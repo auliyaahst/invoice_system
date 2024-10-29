@@ -9,10 +9,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Get all invoices
+// Get all invoices with customer names and created_at timestamp
 app.get('/invoices', async (req, res) => {
   try {
-    const allInvoices = await pool.query('SELECT * FROM Invoices');
+    const allInvoices = await pool.query(`
+      SELECT i.InvoiceID, c.Name as customername, i.InvoiceDate, i.TotalAmount, i.created_at
+      FROM Invoices i
+      JOIN Customers c ON i.CustomerID = c.CustomerID
+    `);
     res.json(allInvoices.rows);
   } catch (err) {
     console.error(err.message);
@@ -38,6 +42,7 @@ app.post('/invoices', async (req, res) => {
       [customerName]
     );
 
+    let customerID;
     if (customerResult.rows.length === 0) {
       // If customer doesn't exist, create new customer
       const newCustomer = await pool.query(
@@ -54,7 +59,7 @@ app.post('/invoices', async (req, res) => {
       `INSERT INTO Invoices 
        (CustomerID, InvoiceDate, DueDate, TotalAmount) 
        VALUES ($1, $2, $3, $4) 
-       RETURNING InvoiceID, CustomerID, InvoiceDate, DueDate, TotalAmount`,
+       RETURNING InvoiceID, CustomerID, InvoiceDate, DueDate, TotalAmount, created_at`,
       [customerID, invoiceDate, dueDate, amount]
     );
 
@@ -97,7 +102,6 @@ app.get('/invoices/total', async (req, res) => {
     console.error(err.message);
   }
 });
-
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

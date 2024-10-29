@@ -12,6 +12,7 @@ const Dashboard = () => {
     amount: ''
   });
   const [error, setError] = useState('');
+  const [selectedInvoice, setSelectedInvoice] = useState(null);
 
   // Fetch initial data for dashboard
   useEffect(() => {
@@ -20,10 +21,10 @@ const Dashboard = () => {
 
   const fetchDashboardData = async () => {
     try {
-      const customerRes = await fetch('http://localhost:5000/customers');
-      const customers = await customerRes.json();
-      setTotalCustomers(Array.isArray(customers) ? customers.length : 0);
-  
+      const customerRes = await fetch('http://localhost:5000/customers/total');
+      const totalCustomersData = await customerRes.json();
+      setTotalCustomers(totalCustomersData.count);
+
       const invoiceRes = await fetch('http://localhost:5000/invoices');
       const invoicesData = await invoiceRes.json();
       setInvoices(invoicesData);
@@ -32,7 +33,7 @@ const Dashboard = () => {
       console.error('Error fetching dashboard data:', err.message);
       setError('Failed to load dashboard data');
     }
-  };  
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -57,7 +58,7 @@ const Dashboard = () => {
         setTotalInvoices(prev => prev + 1);
         setShowModal(false);
         setFormData({ customerName: '', invoiceDate: '', amount: '' });
-        
+
         // Refresh dashboard data to ensure everything is in sync
         fetchDashboardData();
       } else {
@@ -71,7 +72,7 @@ const Dashboard = () => {
 
   const formatDateTime = (dateString) => {
     const date = new Date(dateString);
-  
+
     // Convert to user's local timezone and format date and time
     return date.toLocaleString(undefined, {
       day: '2-digit',
@@ -83,7 +84,16 @@ const Dashboard = () => {
       timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone // User's timezone
     });
   };
-  
+
+  const handleViewInvoice = (invoice) => {
+    setSelectedInvoice(invoice);
+    setShowModal(true);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
   return (
     <div className="dashboard">
       <h1 className="text-xl font-bold">Invoice System</h1>
@@ -120,20 +130,29 @@ const Dashboard = () => {
               <th className="border px-4 py-2">Customer</th>
               <th className="border px-4 py-2">Date</th>
               <th className="border px-4 py-2">Amount</th>
+              <th className="border px-4 py-2">Actions</th>
             </tr>
           </thead>
           <tbody>
             {invoices.length === 0 ? (
               <tr>
-                <td colSpan="4" className="text-center py-2">No invoices yet</td>
+                <td colSpan="5" className="text-center py-2">No invoices yet</td>
               </tr>
             ) : (
               invoices.map((invoice) => (
                 <tr key={invoice.invoiceid}>
                   <td className="border text-center px-4 py-2">{invoice.invoiceid}</td>
                   <td className="border text-center px-4 py-2">{invoice.customername}</td>
-                  <td className="border text-center px-4 py-2">{formatDateTime(invoice.invoicedate)}</td>
-                  <td className="border text-center px-4 py-2">{invoice.amount}</td>
+                  <td className="border text-center px-4 py-2">{formatDateTime(invoice.created_at)}</td>
+                  <td className="border text-center px-4 py-2">{invoice.totalamount}</td>
+                  <td className="border text-center px-4 py-2">
+                    <button
+                      className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                      onClick={() => handleViewInvoice(invoice)}
+                    >
+                      View Invoice
+                    </button>
+                  </td>
                 </tr>
               ))
             )}
@@ -151,58 +170,74 @@ const Dashboard = () => {
         </button>
       </div>
 
-      {/* Modal for New Invoice */}
-      {showModal && (
+      {/* Modal for Viewing and Printing Invoice */}
+      {showModal && selectedInvoice && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-75">
-          <div className="bg-white p-8 rounded shadow">
-            <h2 className="text-lg font-bold mb-4">New Invoice</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label className="block mb-2">Customer Name</label>
-                <input
-                  type="text"
-                  value={formData.customerName}
-                  onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
-                  className="border p-2 rounded w-full"
-                  required
-                />
+          <div className="bg-white p-8 rounded shadow-lg w-3/4 max-w-3xl">
+            <h2 className="text-2xl font-bold mb-4 text-center">Invoice Details</h2>
+            <div className="border-b pb-4 mb-4">
+              <div className="flex justify-between mb-2">
+                <div>
+                  <p className="font-semibold">Invoice ID:</p>
+                  <p>{selectedInvoice.invoiceid}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Customer Name:</p>
+                  <p>{selectedInvoice.customername}</p>
+                </div>
               </div>
-              <div className="mb-4">
-                <label className="block mb-2">Invoice Date</label>
-                <input
-                  type="date"
-                  value={formData.invoiceDate}
-                  onChange={(e) => setFormData({ ...formData, invoiceDate: e.target.value })}
-                  className="border p-2 rounded w-full"
-                  required
-                />
+              <div className="flex justify-between mb-2">
+                <div>
+                  <p className="font-semibold">Invoice Date:</p>
+                  <p>{formatDateTime(selectedInvoice.invoicedate)}</p>
+                </div>
+                <div>
+                  <p className="font-semibold">Created At:</p>
+                  <p>{formatDateTime(selectedInvoice.created_at)}</p>
+                </div>
               </div>
-              <div className="mb-4">
-                <label className="block mb-2">Amount</label>
-                <input
-                  type="number"
-                  value={formData.amount}
-                  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
-                  className="border p-2 rounded w-full"
-                  required
-                />
+              <div className="flex justify-between mb-2">
+                <div>
+                  <p className="font-semibold">Amount:</p>
+                  <p>{selectedInvoice.totalamount}</p>
+                </div>
               </div>
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mr-2"
-                  onClick={() => setShowModal(false)}
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
-                >
-                  Save Invoice
-                </button>
-              </div>
-            </form>
+            </div>
+            <div className="border-b pb-4 mb-4">
+              <h3 className="text-xl font-semibold mb-2">Items</h3>
+              {/* Assuming you have items in the invoice, you can map through them here */}
+              {/* Example: */}
+              {/* {selectedInvoice.items.map(item => (
+                <div className="flex justify-between mb-2" key={item.id}>
+                  <div>
+                    <p className="font-semibold">{item.name}</p>
+                    <p>{item.description}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold">Quantity:</p>
+                    <p>{item.quantity}</p>
+                  </div>
+                  <div>
+                    <p className="font-semibold">Price:</p>
+                    <p>{item.price}</p>
+                  </div>
+                </div>
+              ))} */}
+            </div>
+            <div className="flex justify-end mt-4">
+              <button
+                className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mr-2"
+                onClick={handlePrint}
+              >
+                Print Invoice
+              </button>
+              <button
+                className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
+                onClick={() => setShowModal(false)}
+              >
+                Close
+              </button>
+            </div>
           </div>
         </div>
       )}
