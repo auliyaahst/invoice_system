@@ -22,8 +22,8 @@ const Dashboard = () => {
     try {
       const customerRes = await fetch('http://localhost:5000/customers');
       const customers = await customerRes.json();
-      setTotalCustomers(customers.length);
-
+      setTotalCustomers(Array.isArray(customers) ? customers.length : 0);
+  
       const invoiceRes = await fetch('http://localhost:5000/invoices');
       const invoicesData = await invoiceRes.json();
       setInvoices(invoicesData);
@@ -32,7 +32,7 @@ const Dashboard = () => {
       console.error('Error fetching dashboard data:', err.message);
       setError('Failed to load dashboard data');
     }
-  };
+  };  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,6 +67,21 @@ const Dashboard = () => {
       console.error('Error submitting form:', err.message);
       setError('Failed to save invoice. Please try again.');
     }
+  };
+
+  const formatDateTime = (dateString) => {
+    const date = new Date(dateString);
+  
+    // Convert to user's local timezone and format date and time
+    return date.toLocaleString(undefined, {
+      day: '2-digit',
+      month: 'long',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false, // 24-hour format
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone // User's timezone
+    });
   };
   
   return (
@@ -115,10 +130,10 @@ const Dashboard = () => {
             ) : (
               invoices.map((invoice) => (
                 <tr key={invoice.invoiceid}>
-                  <td className="border px-4 py-2">{invoice.invoiceid}</td>
-                  <td className="border px-4 py-2">{invoice.customername}</td>
-                  <td className="border px-4 py-2">{invoice.invoicedate}</td>
-                  <td className="border px-4 py-2">{invoice.amount}</td>
+                  <td className="border text-center px-4 py-2">{invoice.invoiceid}</td>
+                  <td className="border text-center px-4 py-2">{invoice.customername}</td>
+                  <td className="border text-center px-4 py-2">{formatDateTime(invoice.invoicedate)}</td>
+                  <td className="border text-center px-4 py-2">{invoice.amount}</td>
                 </tr>
               ))
             )}
