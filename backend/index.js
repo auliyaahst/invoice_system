@@ -9,6 +9,30 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Get all products
+app.get('/products', async (req, res) => {
+  try {
+    const allProducts = await pool.query('SELECT * FROM Products');
+    res.json(allProducts.rows);
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+// Add a new product
+app.post('/products', async (req, res) => {
+  try {
+    const { name, price } = req.body;
+    const newProduct = await pool.query(
+      'INSERT INTO Products (productname, Price) VALUES ($1, $2) RETURNING *',
+      [name, price]
+    );
+    res.status(201).json(newProduct.rows[0]);
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
 // Get all invoices with customer names and created_at timestamp
 app.get('/invoices', async (req, res) => {
   try {
