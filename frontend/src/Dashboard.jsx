@@ -15,8 +15,8 @@ import "./index.css";
 // import Products from './Products';
 
 const navigation = [
-  { name: "Dashboard", href: "./", current: true },
-  { name: "Products", href: "./Products", current: false },
+  { name: "Dashboard", href: "/", current: true },
+  { name: "Products", href: "/products", current: false },
   // { name: 'Projects', href: '#', current: false },
   // { name: 'Calendar', href: '#', current: false },
 ];
