@@ -5,7 +5,8 @@ const Dashboard = () => {
   const [invoices, setInvoices] = useState([]);
   const [totalCustomers, setTotalCustomers] = useState(0);
   const [totalInvoices, setTotalInvoices] = useState(0);
-  const [showModal, setShowModal] = useState(false);
+  const [showNewInvoiceModal, setShowNewInvoiceModal] = useState(false);
+  const [showViewInvoiceModal, setShowViewInvoiceModal] = useState(false);
   const [formData, setFormData] = useState({
     customerName: '',
     invoiceDate: '',
@@ -56,7 +57,7 @@ const Dashboard = () => {
         // Add new invoice to the list and update totals
         setInvoices([data, ...invoices]);
         setTotalInvoices(prev => prev + 1);
-        setShowModal(false);
+        setShowNewInvoiceModal(false);
         setFormData({ customerName: '', invoiceDate: '', amount: '' });
 
         // Refresh dashboard data to ensure everything is in sync
@@ -87,7 +88,7 @@ const Dashboard = () => {
 
   const handleViewInvoice = (invoice) => {
     setSelectedInvoice(invoice);
-    setShowModal(true);
+    setShowViewInvoiceModal(true);
   };
 
   const handlePrint = () => {
@@ -164,14 +165,70 @@ const Dashboard = () => {
       <div className="my-4">
         <button
           className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-          onClick={() => setShowModal(true)}
+          onClick={() => setShowNewInvoiceModal(true)}
         >
           New Invoice
         </button>
       </div>
 
+      {/* Modal for New Invoice */}
+      {showNewInvoiceModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-75">
+          <div className="bg-white p-8 rounded shadow-lg w-3/4 max-w-3xl">
+            <h2 className="text-2xl font-bold mb-4 text-center">New Invoice</h2>
+            <form onSubmit={handleSubmit}>
+              <div className="mb-4">
+                <label className="block mb-2">Customer Name</label>
+                <input
+                  type="text"
+                  value={formData.customerName}
+                  onChange={(e) => setFormData({ ...formData, customerName: e.target.value })}
+                  className="border p-2 rounded w-full"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block mb-2">Invoice Date</label>
+                <input
+                  type="date"
+                  value={formData.invoiceDate}
+                  onChange={(e) => setFormData({ ...formData, invoiceDate: e.target.value })}
+                  className="border p-2 rounded w-full"
+                  required
+                />
+              </div>
+              <div className="mb-4">
+                <label className="block mb-2">Amount</label>
+                <input
+                  type="number"
+                  value={formData.amount}
+                  onChange={(e) => setFormData({ ...formData, amount: e.target.value })}
+                  className="border p-2 rounded w-full"
+                  required
+                />
+              </div>
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mr-2"
+                  onClick={() => setShowNewInvoiceModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                >
+                  Save Invoice
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
       {/* Modal for Viewing and Printing Invoice */}
-      {showModal && selectedInvoice && (
+      {showViewInvoiceModal && selectedInvoice && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-75">
           <div className="bg-white p-8 rounded shadow-lg w-3/4 max-w-3xl">
             <h2 className="text-2xl font-bold mb-4 text-center">Invoice Details</h2>
@@ -233,7 +290,7 @@ const Dashboard = () => {
               </button>
               <button
                 className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-                onClick={() => setShowModal(false)}
+                onClick={() => setShowViewInvoiceModal(false)}
               >
                 Close
               </button>
