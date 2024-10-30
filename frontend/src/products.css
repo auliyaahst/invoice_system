@@ -6,6 +6,10 @@
   padding: 20px;
 }
 
+.relative {
+    padding: 20px;
+  }
+
 .product-card {
   background-color: #f5f5f5;
   padding: 20px;
