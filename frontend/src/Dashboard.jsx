@@ -86,6 +86,10 @@ const Dashboard = () => {
     });
   };
 
+  const formatCurrency = (amount) => {
+    return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(amount);
+  };
+
   const handleViewInvoice = (invoice) => {
     setSelectedInvoice(invoice);
     setShowViewInvoiceModal(true);
@@ -145,7 +149,7 @@ const Dashboard = () => {
                   <td className="border text-center px-4 py-2">{invoice.invoiceid}</td>
                   <td className="border text-center px-4 py-2">{invoice.customername}</td>
                   <td className="border text-center px-4 py-2">{formatDateTime(invoice.created_at)}</td>
-                  <td className="border text-center px-4 py-2">{invoice.totalamount}</td>
+                  <td className="border text-center px-4 py-2">{formatCurrency(invoice.totalamount)}</td>
                   <td className="border text-center px-4 py-2">
                     <button
                       className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
@@ -256,7 +260,7 @@ const Dashboard = () => {
               <div className="flex justify-between mb-2">
                 <div>
                   <p className="font-semibold">Amount:</p>
-                  <p>{selectedInvoice.totalamount}</p>
+                  <p>{formatCurrency(selectedInvoice.totalamount)}</p>
                 </div>
               </div>
             </div>
@@ -276,7 +280,7 @@ const Dashboard = () => {
                   </div>
                   <div>
                     <p className="font-semibold">Price:</p>
-                    <p>{item.price}</p>
+                    <p>{formatCurrency(item.price)}</p>
                   </div>
                 </div>
               ))} */}
