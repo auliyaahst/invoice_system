@@ -50,11 +50,17 @@ const Dashboard = () => {
       const customerRes = await fetch("http://localhost:5000/customers/total");
       const totalCustomersData = await customerRes.json();
       setTotalCustomers(totalCustomersData.count);
-
+  
       const invoiceRes = await fetch("http://localhost:5000/invoices");
       const invoicesData = await invoiceRes.json();
       setInvoices(invoicesData);
       setTotalInvoices(invoicesData.length);
+  
+      // Calculate total revenue by summing all totalamount values as numbers
+      const revenue = invoicesData.reduce((acc, invoice) => acc + Number(invoice.totalamount), 0);
+      
+      // Format the revenue to two decimal places
+      setTotalRevenue(revenue.toFixed(2));
     } catch (err) {
       console.error("Error fetching dashboard data:", err.message);
       setError("Failed to load dashboard data");
@@ -163,7 +169,7 @@ const Dashboard = () => {
   };
 
   return (
-    <Disclosure as="nav" className="bg-gray-800">
+    <Disclosure as="nav" className="bg-gray-800 bg-cover">
       <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
         <div className="relative flex h-16 items-center justify-between">
           <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
@@ -214,23 +220,25 @@ const Dashboard = () => {
 
       <DisclosurePanel className="sm:hidden">
         <div className="space-y-1 px-2 pb-3 pt-2">
-          {navigation.map((item) => (
+          {navigation.map(item =>
             <DisclosureButton
               key={item.name}
               as="a"
               href={item.href}
-              aria-current={item.current ? 'page' : undefined}
+              aria-current={item.current ? "page" : undefined}
               className={classNames(
-                item.current ? 'bg-gray-900 text-white' : 'text-gray-300 hover:bg-gray-700 hover:text-white',
-                'block rounded-md px-3 py-2 text-base font-medium',
+                item.current
+                  ? "bg-gray-900 text-white"
+                  : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                "block rounded-md px-3 py-2 text-base font-medium"
               )}
             >
               {item.name}
             </DisclosureButton>
-          ))}
+          )}
         </div>
       </DisclosurePanel>
-      
+
       <div className="dashboard">
         <h1 className="text-xl font-bold text-slate-50">Invoice System</h1>
 
@@ -264,7 +272,7 @@ const Dashboard = () => {
               <div className="ml-4">
                 <h2 className="text-lg">Total Revenue</h2>
                 <p className="text-xl">
-                  {totalRevenue}
+                {formatCurrency(totalRevenue)}
                 </p>
               </div>
             </div>
