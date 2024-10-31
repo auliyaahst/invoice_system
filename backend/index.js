@@ -107,6 +107,45 @@ app.post("/invoices", async (req, res) => {
   }
 });
 
+// create invoiceDetails from passing the invoiceID, productID, quantity, taxID
+app.post("/invoiceDetails", async (req, res) => {
+  try {
+    const { invoiceID, productID, quantity, taxID } = req.body;
+    const product = await pool.query(
+      "SELECT Price FROM Products WHERE ProductID = $1",
+      [productID]
+    );
+    const lineTotal = product.rows[0].price * quantity;
+
+    await pool.query(
+      `INSERT INTO InvoiceDetails 
+       (InvoiceID, ProductID, Quantity, TaxID, LineTotal) 
+       VALUES ($1, $2, $3, $4, $5)`,
+      [invoiceID, productID, quantity, taxID, lineTotal]
+    );
+
+    res.status(201).json({ message: "Invoice details added successfully" });
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
+app.get("/invoiceDetails/:invoiceID", async (req, res) => {
+  try {
+    const { invoiceID } = req.params;
+    const invoiceDetails = await pool.query(
+      `SELECT p.ProductName, id.Quantity, id.LineTotal
+       FROM InvoiceDetails id
+       JOIN Products p ON id.ProductID = p.ProductID
+       WHERE id.InvoiceID = $1`,
+      [invoiceID]
+    );
+    res.json(invoiceDetails.rows);
+  } catch (err) {
+    console.error(err.message);
+  }
+});
+
 // Get the total number of customers
 app.get("/customers/total", async (req, res) => {
   try {

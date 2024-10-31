@@ -21,11 +21,12 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-const Products = ({ onCreateInvoice }) => {
+const Products = () => {
   const [products, setProducts] = useState([]);
   const [formData, setFormData] = useState({ name: "", price: 0 });
   const [showNewProductModal, setShowNewProductModal] = useState(false);
   const [cart, setCart] = useState([]);
+  const [createInvoice, setCreateInvoice] = useState(false);
   const [showCart, setShowCart] = useState(false);
   const [error, setError] = useState("");
 
@@ -121,12 +122,37 @@ const Products = ({ onCreateInvoice }) => {
     }).format(amount);
   };
 
-  const handleCreateInvoice = () => {
+  const handleCreateInvoice = async e => {
+    e.preventDefault();
     if (cart.length === 0) {
       setError("Please add at least one product to the cart");
       return;
+    } else {
+      try {
+        for (const product of cart) {
+          const res = await fetch("http://localhost:5000/invoiceDetails", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              invoiceID: 1, // Hardcoded for now
+              productID: product.productid,
+              quantity: product.quantity,
+              taxID: 1 // Hardcoded for now
+            })
+          });
+          const data = await res.json();
+          if (res.ok) {
+            console.log("Invoice details added successfully");
+          } else {
+            setError(data.error);
+          }
+        }
+      } catch (err) {
+        console.error("Error adding invoice details:", err);
+        setError("Failed to add invoice details. Please try again.");
+      }
     }
-    onCreateInvoice(cart, calculateTotal());
+    setCreateInvoice(cart, calculateTotal());
     setCart([]); // Clear cart after creating invoice
     setShowCart(false);
   };
@@ -371,7 +397,10 @@ const Products = ({ onCreateInvoice }) => {
                 >
                   Create Invoice
                 </button>
-                {error && <p>{error}</p>}
+                {error &&
+                  <p>
+                    {error}
+                  </p>}
               </div>
             </div>
           </div>}
