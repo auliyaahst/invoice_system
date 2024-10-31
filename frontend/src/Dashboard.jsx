@@ -6,19 +6,14 @@ import {
   Menu,
   MenuButton,
   MenuItem,
-  MenuItems,
+  MenuItems
 } from "@headlessui/react";
 import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
-// import Products from "./Products";
 import "./index.css";
-// import Dashboard from './Dashboard';
-// import Products from './Products';
 
 const navigation = [
   { name: "Dashboard", href: "/", current: true },
-  { name: "Products", href: "/products", current: false },
-  // { name: 'Projects', href: '#', current: false },
-  // { name: 'Calendar', href: '#', current: false },
+  { name: "Products", href: "/products", current: false }
 ];
 
 function classNames(...classes) {
@@ -35,7 +30,7 @@ const Dashboard = () => {
   const [formData, setFormData] = useState({
     customerName: "",
     invoiceDate: "",
-    amount: "",
+    amount: ""
   });
   const [error, setError] = useState("");
   const [selectedInvoice, setSelectedInvoice] = useState(null);
@@ -50,15 +45,18 @@ const Dashboard = () => {
       const customerRes = await fetch("http://localhost:5000/customers/total");
       const totalCustomersData = await customerRes.json();
       setTotalCustomers(totalCustomersData.count);
-  
+
       const invoiceRes = await fetch("http://localhost:5000/invoices");
       const invoicesData = await invoiceRes.json();
       setInvoices(invoicesData);
       setTotalInvoices(invoicesData.length);
-  
+
       // Calculate total revenue by summing all totalamount values as numbers
-      const revenue = invoicesData.reduce((acc, invoice) => acc + Number(invoice.totalamount), 0);
-      
+      const revenue = invoicesData.reduce(
+        (acc, invoice) => acc + Number(invoice.totalamount),
+        0
+      );
+
       // Format the revenue to two decimal places
       setTotalRevenue(revenue.toFixed(2));
     } catch (err) {
@@ -78,8 +76,8 @@ const Dashboard = () => {
         body: JSON.stringify({
           customerName: formData.customerName,
           invoiceDate: formData.invoiceDate,
-          amount: parseFloat(formData.amount),
-        }),
+          amount: parseFloat(formData.amount)
+        })
       });
 
       const data = await res.json();
@@ -113,14 +111,14 @@ const Dashboard = () => {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false, // 24-hour format
-      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // User's timezone
+      timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone // User's timezone
     });
   };
 
   const formatCurrency = amount => {
     return new Intl.NumberFormat("id-ID", {
       style: "currency",
-      currency: "IDR",
+      currency: "IDR"
     }).format(amount);
   };
 
@@ -147,8 +145,8 @@ const Dashboard = () => {
           customerName: formData.customerName,
           invoiceDate: formData.invoiceDate,
           products: cartItems,
-          totalAmount: totalAmount,
-        }),
+          totalAmount: totalAmount
+        })
       });
 
       const data = await res.json();
@@ -169,76 +167,77 @@ const Dashboard = () => {
   };
 
   return (
-    <Disclosure as="nav" className="bg-gray-800 bg-cover">
-      <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-        <div className="relative flex h-16 items-center justify-between">
-          <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
-            {/* Mobile menu button*/}
-            <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-              <span className="absolute -inset-0.5" />
-              <span className="sr-only">Open main menu</span>
-              <Bars3Icon
-                aria-hidden="true"
-                className="block h-6 w-6 group-data-[open]:hidden"
-              />
-              <XMarkIcon
-                aria-hidden="true"
-                className="hidden h-6 w-6 group-data-[open]:block"
-              />
-            </DisclosureButton>
-          </div>
-          <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-            <div className="flex flex-shrink-0 items-center">
-              <img
-                alt="Your Company"
-                src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500"
-                className="h-8 w-auto"
-              />
+    <div className="min-h-screen bg-slate-700">
+      <Disclosure as="nav" className="bg-gray-800 bg-cover">
+        <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
+          <div className="relative flex h-16 items-center justify-between">
+            <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
+              {/* Mobile menu button*/}
+              <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
+                <span className="absolute -inset-0.5" />
+                <span className="sr-only">Open main menu</span>
+                <Bars3Icon
+                  aria-hidden="true"
+                  className="block h-6 w-6 group-data-[open]:hidden"
+                />
+                <XMarkIcon
+                  aria-hidden="true"
+                  className="hidden h-6 w-6 group-data-[open]:block"
+                />
+              </DisclosureButton>
             </div>
-            <div className="hidden sm:ml-6 sm:block">
-              <div className="flex space-x-4">
-                {navigation.map(item =>
-                  <a
-                    key={item.name}
-                    href={item.href}
-                    aria-current={item.current ? "page" : undefined}
-                    className={classNames(
-                      item.current
-                        ? "bg-gray-900 text-white"
-                        : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                      "rounded-md px-3 py-2 text-sm font-medium"
-                    )}
-                  >
-                    {item.name}
-                  </a>
-                )}
+            <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
+              <div className="flex flex-shrink-0 items-center">
+                <img
+                  alt="Your Company"
+                  src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500"
+                  className="h-8 w-auto"
+                />
+              </div>
+              <div className="hidden sm:ml-6 sm:block">
+                <div className="flex space-x-4">
+                  {navigation.map(item =>
+                    <a
+                      key={item.name}
+                      href={item.href}
+                      aria-current={item.current ? "page" : undefined}
+                      className={classNames(
+                        item.current
+                          ? "bg-gray-900 text-white"
+                          : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                        "rounded-md px-3 py-2 text-sm font-medium"
+                      )}
+                    >
+                      {item.name}
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      <DisclosurePanel className="sm:hidden">
-        <div className="space-y-1 px-2 pb-3 pt-2">
-          {navigation.map(item =>
-            <DisclosureButton
-              key={item.name}
-              as="a"
-              href={item.href}
-              aria-current={item.current ? "page" : undefined}
-              className={classNames(
-                item.current
-                  ? "bg-gray-900 text-white"
-                  : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                "block rounded-md px-3 py-2 text-base font-medium"
-              )}
-            >
-              {item.name}
-            </DisclosureButton>
-          )}
-        </div>
-      </DisclosurePanel>
-
+        <DisclosurePanel className="sm:hidden">
+          <div className="space-y-1 px-2 pb-3 pt-2">
+            {navigation.map(item =>
+              <DisclosureButton
+                key={item.name}
+                as="a"
+                href={item.href}
+                aria-current={item.current ? "page" : undefined}
+                className={classNames(
+                  item.current
+                    ? "bg-gray-900 text-white"
+                    : "text-gray-300 hover:bg-gray-700 hover:text-white",
+                  "block rounded-md px-3 py-2 text-base font-medium"
+                )}
+              >
+                {item.name}
+              </DisclosureButton>
+            )}
+          </div>
+        </DisclosurePanel>
+      </Disclosure>
       <div className="dashboard">
         <h1 className="text-xl font-bold text-slate-50">Invoice System</h1>
 
@@ -272,7 +271,7 @@ const Dashboard = () => {
               <div className="ml-4">
                 <h2 className="text-lg">Total Revenue</h2>
                 <p className="text-xl">
-                {formatCurrency(totalRevenue)}
+                  {formatCurrency(totalRevenue)}
                 </p>
               </div>
             </div>
@@ -353,7 +352,7 @@ const Dashboard = () => {
                     onChange={e =>
                       setFormData({
                         ...formData,
-                        customerName: e.target.value,
+                        customerName: e.target.value
                       })}
                     className="border p-2 rounded w-full"
                     required
@@ -494,7 +493,7 @@ const Dashboard = () => {
 
         {/* <Products onCreateInvoice={handleCreateInvoice} /> */}
       </div>
-    </Disclosure>
+    </div>
   );
 };
 

@@ -1,8 +1,8 @@
 // index.js (Backend)
-const express = require('express');
-const cors = require('cors');
-const pool = require('./db');
-require('dotenv').config();
+const express = require("express");
+const cors = require("cors");
+const pool = require("./db");
+require("dotenv").config();
 
 const app = express();
 
@@ -10,9 +10,9 @@ app.use(cors());
 app.use(express.json());
 
 // Get all products
-app.get('/products', async (req, res) => {
+app.get("/products", async (req, res) => {
   try {
-    const allProducts = await pool.query('SELECT * FROM Products');
+    const allProducts = await pool.query("SELECT * FROM Products");
     res.json(allProducts.rows);
   } catch (err) {
     console.error(err.message);
@@ -20,11 +20,11 @@ app.get('/products', async (req, res) => {
 });
 
 // Add a new product
-app.post('/products', async (req, res) => {
+app.post("/products", async (req, res) => {
   try {
     const { name, price } = req.body;
     const newProduct = await pool.query(
-      'INSERT INTO Products (productname, Price) VALUES ($1, $2) RETURNING *',
+      "INSERT INTO Products (ProductName, Price) VALUES ($1, $2) RETURNING *",
       [name, price]
     );
     res.status(201).json(newProduct.rows[0]);
@@ -34,7 +34,7 @@ app.post('/products', async (req, res) => {
 });
 
 // Get all invoices with customer names and created_at timestamp
-app.get('/invoices', async (req, res) => {
+app.get("/invoices", async (req, res) => {
   try {
     const allInvoices = await pool.query(`
       SELECT i.InvoiceID, c.Name as customername, i.InvoiceDate, i.TotalAmount, i.created_at
@@ -47,10 +47,10 @@ app.get('/invoices', async (req, res) => {
   }
 });
 
-app.post('/invoices', async (req, res) => {
+app.post("/invoices", async (req, res) => {
   try {
     const { customerName, invoiceDate, amount } = req.body;
-    
+
     // Input validation
     if (!customerName || !invoiceDate || !amount) {
       return res.status(400).json({ error: "All fields are required" });
@@ -59,10 +59,10 @@ app.post('/invoices', async (req, res) => {
     // Calculate due date (e.g., 30 days from invoice date)
     const dueDate = new Date(invoiceDate);
     dueDate.setDate(dueDate.getDate() + 30);
-    
+
     // First, check if customer exists
     const customerResult = await pool.query(
-      'SELECT CustomerID FROM Customers WHERE Name ILIKE $1',
+      "SELECT CustomerID FROM Customers WHERE Name ILIKE $1",
       [customerName]
     );
 
@@ -70,8 +70,8 @@ app.post('/invoices', async (req, res) => {
     if (customerResult.rows.length === 0) {
       // If customer doesn't exist, create new customer
       const newCustomer = await pool.query(
-        'INSERT INTO Customers (Name, Email, Phone, Address) VALUES ($1, $2, $3, $4) RETURNING CustomerID',
-        [customerName, '', '', ''] // Adding minimal required customer data
+        "INSERT INTO Customers (Name, Email, Phone, Address) VALUES ($1, $2, $3, $4) RETURNING CustomerID",
+        [customerName, "", "", ""] // Adding minimal required customer data
       );
       customerID = newCustomer.rows[0].customerid;
     } else {
@@ -89,7 +89,84 @@ app.post('/invoices', async (req, res) => {
 
     // Fetch customer details to include in response
     const customerDetails = await pool.query(
-      'SELECT Name as customername FROM Customers WHERE CustomerID = $1',
+      "SELECT Name as customername FROM Customers WHERE CustomerID = $1",
+      [customerID]
+    );
+
+    // Combine invoice and customer data for response
+    const responseData = {
+      ...newInvoice.rows[0],
+      customername: customerDetails.rows[0].customername,
+      amount: newInvoice.rows[0].totalamount // Align with frontend expectations
+    };
+
+    res.status(201).json(responseData);
+  } catch (err) {
+    console.error("Server error:", err.message);
+    res.status(500).json({ error: "Server error", details: err.message });
+  }
+});
+
+// create new invoice with one or multiple products
+app.post("/invoices/products", async (req, res) => {
+  try {
+    const { customerName, invoiceDate, products } = req.body;
+
+    // Input validation
+    if (!customerName || !invoiceDate || !products || products.length === 0) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // Calculate due date (e.g., 30 days from invoice date)
+    const dueDate = new Date(invoiceDate);
+    dueDate.setDate(dueDate.getDate() + 30);
+
+    // First, check if customer exists
+    const customerResult = await pool.query(
+      "SELECT CustomerID FROM Customers WHERE Name ILIKE $1",
+      [customerName]
+    );
+
+    let customerID;
+    if (customerResult.rows.length === 0) {
+      // If customer doesn't exist, create new customer
+      const newCustomer = await pool.query(
+        "INSERT INTO Customers (Name, Email, Phone, Address) VALUES ($1, $2, $3, $4) RETURNING CustomerID",
+        [customerName, "", "", ""] // Adding minimal required customer data
+      );
+      customerID = newCustomer.rows[0].customerid;
+    } else {
+      customerID = customerResult.rows[0].customerid;
+    }
+
+    // Calculate total amount of the invoice
+    const totalAmount = products.reduce(
+      (acc, product) => acc + product.price,
+      0
+    );
+
+    // Insert new invoice with all required fields
+    const newInvoice = await pool.query(
+      `INSERT INTO Invoices 
+       (CustomerID, InvoiceDate, DueDate, TotalAmount) 
+       VALUES ($1, $2, $3, $4) 
+       RETURNING InvoiceID, CustomerID, InvoiceDate, DueDate, TotalAmount, created_at`,
+      [customerID, invoiceDate, dueDate, totalAmount]
+    );
+
+    // Insert invoice items (products) into InvoiceItems table
+    for (const product of products) {
+      await pool.query(
+        `INSERT INTO InvoiceItems 
+         (InvoiceID, ProductID, Quantity, UnitPrice) 
+         VALUES ($1, $2, $3, $4)`,
+        [newInvoice.rows[0].invoiceid, product.productid, 1, product.price]
+      );
+    }
+
+    // Fetch customer details to include in response
+    const customerDetails = await pool.query(
+      "SELECT Name as customername FROM Customers WHERE CustomerID = $1",
       [customerID]
     );
 
@@ -108,9 +185,9 @@ app.post('/invoices', async (req, res) => {
 });
 
 // Get the total number of customers
-app.get('/customers/total', async (req, res) => {
+app.get("/customers/total", async (req, res) => {
   try {
-    const totalCustomers = await pool.query('SELECT COUNT(*) FROM Customers');
+    const totalCustomers = await pool.query("SELECT COUNT(*) FROM Customers");
     res.json(totalCustomers.rows[0]);
   } catch (err) {
     console.error(err.message);
@@ -118,9 +195,9 @@ app.get('/customers/total', async (req, res) => {
 });
 
 // Get the total number of invoices
-app.get('/invoices/total', async (req, res) => {
+app.get("/invoices/total", async (req, res) => {
   try {
-    const totalInvoices = await pool.query('SELECT COUNT(*) FROM Invoices');
+    const totalInvoices = await pool.query("SELECT COUNT(*) FROM Invoices");
     res.json(totalInvoices.rows[0]);
   } catch (err) {
     console.error(err.message);
