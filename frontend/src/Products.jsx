@@ -25,6 +25,7 @@ const Products = () => {
   const [products, setProducts] = useState([]);
   const [formData, setFormData] = useState({ name: "", price: 0 });
   const [showNewProductModal, setShowNewProductModal] = useState(false);
+  const [showCreateInvoice, setShowCreateInvoice] = useState(false);
   const [cart, setCart] = useState([]);
   const [createInvoice, setCreateInvoice] = useState(false);
   const [showCart, setShowCart] = useState(false);
@@ -127,34 +128,56 @@ const Products = () => {
     if (cart.length === 0) {
       setError("Please add at least one product to the cart");
       return;
-    } else {
-      try {
-        for (const product of cart) {
-          const res = await fetch("http://localhost:5000/invoiceDetails", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              invoiceID: 1, // Hardcoded for now
-              productID: product.productid,
-              quantity: product.quantity,
-              taxID: 1 // Hardcoded for now
-            })
-          });
-          const data = await res.json();
-          if (res.ok) {
-            console.log("Invoice details added successfully");
-          } else {
-            setError(data.error);
-          }
-        }
-      } catch (err) {
-        console.error("Error adding invoice details:", err);
-        setError("Failed to add invoice details. Please try again.");
-      }
     }
-    setCreateInvoice(cart, calculateTotal());
-    setCart([]); // Clear cart after creating invoice
-    setShowCart(false);
+
+    try {
+      // First, create the new invoice and retrieve its ID
+      const res = await fetch("http://localhost:5000/invoices/new", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          customerName: formData.name, // Replace or prompt for customer name
+          invoiceDate: new Date().toISOString(), // Current date as invoice date
+          amount: calculateTotal() // Pass the total amount for the invoice
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error);
+        return;
+      }
+
+      const newInvoiceID = data.invoiceID;
+
+      // Now, add each product in the cart as an invoice detail
+      for (const product of cart) {
+        const resDetail = await fetch("http://localhost:5000/invoiceDetails", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            invoiceID: newInvoiceID,
+            productID: product.productid,
+            quantity: product.quantity,
+            taxID: 1 // Hardcoded for now, update as needed
+          })
+        });
+
+        if (!resDetail.ok) {
+          const detailData = await resDetail.json();
+          setError(detailData.error);
+          return;
+        }
+      }
+
+      // Clear the cart and reset the UI after successful invoice creation
+      setCreateInvoice(cart, calculateTotal());
+      setCart([]);
+      setShowCart(false);
+    } catch (err) {
+      console.error("Error creating invoice:", err);
+      setError("Failed to create invoice. Please try again.");
+    }
   };
 
   return (
@@ -391,7 +414,7 @@ const Products = () => {
                   </div>}
 
                 <button
-                  onClick={handleCreateInvoice}
+                  onClick={() => setShowCreateInvoice(true)}
                   disabled={cart.length === 0}
                   className="w-full bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
                 >
@@ -402,6 +425,44 @@ const Products = () => {
                     {error}
                   </p>}
               </div>
+
+              {showCreateInvoice &&
+                <div className="modal-overlay">
+                  <div className="modal-content">
+                    <h2 className="text-2xl font-bold mb-4 text-center">
+                      New Product
+                    </h2>
+                    <form onSubmit={handleCreateInvoice}>
+                      <div className="form-group">
+                        <label className="block mb-2">Customer Name</label>
+                        <input
+                          type="text"
+                          value={formData.name}
+                          onChange={e =>
+                            setFormData({ ...formData, name: e.target.value })}
+                          required
+                          className="input-field"
+                        />
+                      </div>
+                      <div className="modal-actions">
+                        <button
+                          type="button"
+                          className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mr-2"
+                          onClick={() => setShowCreateInvoice(false)}
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleCreateInvoice}
+                          type="submit"
+                          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
+                        >
+                          Submit
+                        </button>
+                      </div>
+                    </form>
+                  </div>
+                </div>}
             </div>
           </div>}
       </div>

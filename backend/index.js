@@ -107,6 +107,52 @@ app.post("/invoices", async (req, res) => {
   }
 });
 
+app.post("/invoices/new", async (req, res) => {
+  try {
+    const { customerName, invoiceDate, amount } = req.body;
+
+    // Input validation
+    if (!customerName || !invoiceDate || !amount) {
+      return res.status(400).json({ error: "All fields are required" });
+    }
+
+    // Calculate due date (e.g., 30 days from invoice date)
+    const dueDate = new Date(invoiceDate);
+    dueDate.setDate(dueDate.getDate() + 30);
+
+    // Check if customer exists
+    const customerResult = await pool.query(
+      "SELECT CustomerID FROM Customers WHERE Name ILIKE $1",
+      [customerName]
+    );
+
+    let customerID;
+    if (customerResult.rows.length === 0) {
+      // Create a new customer if one does not exist
+      const newCustomer = await pool.query(
+        "INSERT INTO Customers (Name, Email, Phone, Address) VALUES ($1, $2, $3, $4) RETURNING CustomerID",
+        [customerName, "", "", ""]
+      );
+      customerID = newCustomer.rows[0].customerid;
+    } else {
+      customerID = customerResult.rows[0].customerid;
+    }
+
+    // Insert a new invoice
+    const newInvoice = await pool.query(
+      `INSERT INTO Invoices (CustomerID, InvoiceDate, DueDate, TotalAmount)
+       VALUES ($1, $2, $3, $4) RETURNING InvoiceID`,
+      [customerID, invoiceDate, dueDate, amount]
+    );
+
+    // Return the newly created invoiceID
+    res.status(201).json({ invoiceID: newInvoice.rows[0].invoiceid });
+  } catch (err) {
+    console.error("Error creating invoice:", err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 // create invoiceDetails from passing the invoiceID, productID, quantity, taxID
 app.post("/invoiceDetails", async (req, res) => {
   try {
@@ -130,21 +176,34 @@ app.post("/invoiceDetails", async (req, res) => {
   }
 });
 
-app.get("/invoiceDetails/:invoiceID", async (req, res) => {
+app.get('/invoices/:invoiceID/details', async (req, res) => {
+  const { invoiceID } = req.params;
   try {
-    const { invoiceID } = req.params;
-    const invoiceDetails = await pool.query(
-      `SELECT p.ProductName, id.Quantity, id.LineTotal
-       FROM InvoiceDetails id
-       JOIN Products p ON id.ProductID = p.ProductID
-       WHERE id.InvoiceID = $1`,
+    const invoiceDetails = await db.query(
+      'SELECT * FROM InvoiceDetails WHERE invoiceID = $1',
       [invoiceID]
     );
     res.json(invoiceDetails.rows);
   } catch (err) {
-    console.error(err.message);
+    res.status(500).json({ error: 'Failed to retrieve invoice details' });
   }
 });
+
+// app.get("/invoiceDetails/:invoiceID", async (req, res) => {
+//   try {
+//     const { invoiceID } = req.params;
+//     const invoiceDetails = await pool.query(
+//       `SELECT p.ProductName, id.Quantity, id.LineTotal
+//        FROM InvoiceDetails id
+//        JOIN Products p ON id.ProductID = p.ProductID
+//        WHERE id.InvoiceID = $1`,
+//       [invoiceID]
+//     );
+//     res.json(invoiceDetails.rows);
+//   } catch (err) {
+//     console.error(err.message);
+//   }
+// });
 
 // Get the total number of customers
 app.get("/customers/total", async (req, res) => {
