@@ -121,45 +121,14 @@ const Products = ({ onCreateInvoice }) => {
     }).format(amount);
   };
 
-  const handleCreateInvoice = async () => {
+  const handleCreateInvoice = () => {
     if (cart.length === 0) {
       setError("Please add at least one product to the cart");
       return;
     }
-
-    try {
-      const invoiceResponse = await fetch("http://localhost:5000/invoices", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          customerName: "Customer Name",
-          invoiceDate: new Date().toISOString(),
-          amount: calculateTotal()
-        })
-      });
-
-      const { invoiceId } = await invoiceResponse.json();
-
-      for (const item of cart) {
-        await fetch(`http://localhost:5000/invoices/${invoiceId}/items`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            productid: item.productid,
-            quantity: item.quantity,
-            price: item.price
-          })
-        });
-      }
-
-      setCart([]);
-      setShowCart(false);
-      setError("");
-      alert("Invoice created successfully!");
-    } catch (err) {
-      console.error("Error creating invoice:", err);
-      setError("Failed to create invoice. Please try again.");
-    }
+    onCreateInvoice(cart, calculateTotal());
+    setCart([]); // Clear cart after creating invoice
+    setShowCart(false);
   };
 
   return (
