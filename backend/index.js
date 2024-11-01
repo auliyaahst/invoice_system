@@ -176,16 +176,21 @@ app.post("/invoiceDetails", async (req, res) => {
   }
 });
 
-app.get('/invoices/:invoiceID/details', async (req, res) => {
+// Get detailed view for a specific invoice
+app.get("/invoices/:invoiceID/details", async (req, res) => {
   const { invoiceID } = req.params;
   try {
-    const invoiceDetails = await db.query(
-      'SELECT * FROM InvoiceDetails WHERE invoiceID = $1',
+    const invoiceDetails = await pool.query(
+      `SELECT p.ProductName, id.Quantity, p.Price, id.LineTotal
+       FROM InvoiceDetails id
+       JOIN Products p ON id.ProductID = p.ProductID
+       WHERE id.InvoiceID = $1`,
       [invoiceID]
     );
     res.json(invoiceDetails.rows);
   } catch (err) {
-    res.status(500).json({ error: 'Failed to retrieve invoice details' });
+    console.error("Error retrieving invoice details:", err.message);
+    res.status(500).json({ error: "Failed to retrieve invoice details" });
   }
 });
 

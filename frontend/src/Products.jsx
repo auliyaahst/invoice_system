@@ -430,7 +430,7 @@ const Products = () => {
                 <div className="modal-overlay">
                   <div className="modal-content">
                     <h2 className="text-2xl font-bold mb-4 text-center">
-                      New Product
+                      Invoice
                     </h2>
                     <form onSubmit={handleCreateInvoice}>
                       <div className="form-group">

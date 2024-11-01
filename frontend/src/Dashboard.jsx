@@ -408,7 +408,7 @@ const Dashboard = () => {
                 Invoice Details
               </h2>
               <div className="border-b pb-4 mb-4">
-                <div className="flex justify-between mb-2">
+                <div className="justify-between grid grid-cols-2 mb-2">
                   <div>
                     <p className="font-semibold">Invoice ID:</p>
                     <p>
@@ -422,7 +422,7 @@ const Dashboard = () => {
                     </p>
                   </div>
                 </div>
-                <div className="flex justify-between mb-2">
+                <div className="grid grid-cols-2 justify-between mb-2">
                   <div>
                     <p className="font-semibold">Invoice Date:</p>
                     <p>
