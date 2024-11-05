@@ -177,43 +177,27 @@ app.post("/invoiceDetails", async (req, res) => {
 });
 
 // Get detailed view for a specific invoice
-app.get("/invoices/:invoiceID/details", async (req, res) => {
-  const { invoiceID } = req.params;
+app.get('/invoices/:invoiceID/details', async (req, res) => {
   try {
-    const parsedInvoiceID = parseInt(invoiceID, 10);
-    if (isNaN(parsedInvoiceID)) {
-      return res.status(400).json({ error: "Invalid invoice ID" });
+    const { invoiceID } = req.params;
+    const query = `
+      SELECT p.ProductName, id.Quantity, p.Price, id.LineTotal
+      FROM InvoiceDetails id
+      JOIN Products p ON id.ProductID = p.ProductID
+      WHERE id.InvoiceID = $1
+    `;
+    const result = await pool.query(query, [invoiceID]);
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: "Invoice details not found" });
     }
 
-    const invoiceDetails = await pool.query(
-      `SELECT p.ProductName, id.Quantity, p.Price, id.LineTotal
-       FROM InvoiceDetails id
-       JOIN Products p ON id.ProductID = p.ProductID
-       WHERE id.InvoiceID = $1`,
-      [parsedInvoiceID]
-    );
-    res.json(invoiceDetails.rows);
+    res.json(result.rows);
   } catch (err) {
-    console.error("Error retrieving invoice details:", err.message);
-    res.status(500).json({ error: "Failed to retrieve invoice details" });
+    console.error("Error fetching invoice details:", err.message);
+    res.status(500).json({ error: "Server error" });
   }
 });
-
-// app.get("/invoiceDetails/:invoiceID", async (req, res) => {
-//   try {
-//     const { invoiceID } = req.params;
-//     const invoiceDetails = await pool.query(
-//       `SELECT p.ProductName, id.Quantity, id.LineTotal
-//        FROM InvoiceDetails id
-//        JOIN Products p ON id.ProductID = p.ProductID
-//        WHERE id.InvoiceID = $1`,
-//       [invoiceID]
-//     );
-//     res.json(invoiceDetails.rows);
-//   } catch (err) {
-//     console.error(err.message);
-//   }
-// });
 
 // Get the total number of customers
 app.get("/customers/total", async (req, res) => {
