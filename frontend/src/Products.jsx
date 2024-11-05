@@ -169,7 +169,7 @@ const Products = () => {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-xl font-bold text-slate-50 dark:text-slate-200 mb-4">
+        <h1 className="text-xl font-bold text-gray-800 dark:text-slate-200 mb-4">
           Products
         </h1>
         <div className="fixed top-4 right-4 z-10">

@@ -102,14 +102,14 @@ function App() {
                         className={`${darkMode
                           ? "bg-gray-700 shadow-[0_0_10px_rgba(255,255,255,0.6)]"
                           : "bg-gray-300"}
-                    relative inline-flex h-8 w-16 items-center rounded-full transition-colors duration-300 ease-in-out`}
+                    relative inline-flex h-4 w-24 items-center rounded-full transition-colors duration-300 ease-in-out`}
                       >
                         <span className="sr-only">Toggle Dark Mode</span>
                         <span
                           className={`${darkMode
                             ? "translate-x-8 bg-white"
                             : "translate-x-1 bg-gray-400"}
-                      inline-block h-6 w-6 transform rounded-full transition-transform duration-300 ease-in-out`}
+                      inline-block h-2 w-4 transform rounded-full transition-transform duration-300 ease-in-out`}
                         />
                       </Switch>
                     </div>
@@ -138,21 +138,21 @@ function App() {
                     {item.name}
                   </DisclosureButton>
                 )}
-                <div className="flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
+                <div className="flex block px-3 py-2 items-center sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                   <Switch
                     checked={darkMode}
                     onChange={toggleDarkMode}
                     className={`${darkMode
                       ? "bg-gray-700 shadow-[0_0_10px_rgba(255,255,255,0.6)]"
                       : "bg-gray-300"}
-                    relative inline-flex h-8 w-16 items-center rounded-full transition-colors duration-300 ease-in-out`}
+                    relative inline-flex h-4 w-24 items-center rounded-full transition-colors duration-300 ease-in-out`}
                   >
                     <span className="sr-only">Toggle Dark Mode</span>
                     <span
                       className={`${darkMode
                         ? "translate-x-8 bg-white"
                         : "translate-x-1 bg-gray-400"}
-                      inline-block h-6 w-6 transform rounded-full transition-transform duration-300 ease-in-out`}
+                      inline-block h-2 w-4 transform rounded-full transition-transform duration-300 ease-in-out`}
                     />
                   </Switch>
                 </div>
