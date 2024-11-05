@@ -169,7 +169,9 @@ const Products = () => {
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <h1 className="text-xl font-bold text-slate-50 dark:text-slate-200 mb-4">Products</h1>
+        <h1 className="text-xl font-bold text-slate-50 dark:text-slate-200 mb-4">
+          Products
+        </h1>
         <div className="fixed top-4 right-4 z-10">
           <button
             onClick={() => setShowCart(!showCart)}
@@ -225,7 +227,9 @@ const Products = () => {
         {showNewProductModal &&
           <div className="modal-overlay">
             <div className="modal-content bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
-              <h2 className="text-2xl font-bold mb-4 text-center">New Product</h2>
+              <h2 className="text-2xl font-bold mb-4 text-center">
+                New Product
+              </h2>
               <form onSubmit={handleAddProduct}>
                 <div className="form-group">
                   <label className="block mb-2">Product Name</label>
@@ -275,7 +279,9 @@ const Products = () => {
           <div className="fixed right-0 top-0 h-full w-full sm:w-96 bg-white dark:bg-gray-800 shadow-lg z-20 transform transition-transform duration-300">
             <div className="p-4 h-full flex flex-col">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shopping Cart</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">
+                  Shopping Cart
+                </h2>
                 <button
                   onClick={() => setShowCart(false)}
                   className="text-gray-500 hover:text-gray-700 text-2xl"
@@ -286,7 +292,9 @@ const Products = () => {
 
               <div className="flex-grow overflow-auto">
                 {cart.length === 0
-                  ? <p className="text-gray-500 text-center dark:text-gray-300">Cart is empty</p>
+                  ? <p className="text-gray-500 text-center dark:text-gray-300">
+                      Cart is empty
+                    </p>
                   : <div className="space-y-4">
                       {cart.map(item =>
                         <div
@@ -341,7 +349,9 @@ const Products = () => {
 
               <div className="border-t pt-4 mt-4 border-gray-200 dark:border-gray-700">
                 <div className="flex justify-between items-center mb-4">
-                  <span className="font-bold text-gray-900 dark:text-gray-100">Total:</span>
+                  <span className="font-bold text-gray-900 dark:text-gray-100">
+                    Total:
+                  </span>
                   <span className="font-bold text-gray-900 dark:text-gray-100">
                     {formatCurrency(calculateTotal())}
                   </span>
@@ -366,24 +376,24 @@ const Products = () => {
               </div>
 
               {showCreateInvoice &&
-                <div className="modal-overlay">
-                  <div className="modal-content">
-                    <h2 className="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-gray-100">
+                <div className="modal-overlay fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                  <div className="modal-content bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 p-6 rounded-lg shadow-lg w-full max-w-md">
+                    <h2 className="text-2xl font-bold mb-4 text-center">
                       Invoice
                     </h2>
                     <form onSubmit={handleCreateInvoice}>
-                      <div className="form-group">
-                        <label className="block mb-2 text-gray-900 dark:text-gray-100">Customer Name</label>
+                      <div className="form-group mb-4">
+                        <label className="block mb-2">Customer Name</label>
                         <input
                           type="text"
                           value={formData.name}
                           onChange={e =>
                             setFormData({ ...formData, name: e.target.value })}
                           required
-                          className="input-field"
+                          className="input-field bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100 w-full p-2 rounded"
                         />
                       </div>
-                      <div className="modal-actions">
+                      <div className="modal-actions flex justify-end">
                         <button
                           type="button"
                           className="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mr-2"
@@ -392,7 +402,6 @@ const Products = () => {
                           Cancel
                         </button>
                         <button
-                          onClick={handleCreateInvoice}
                           type="submit"
                           className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded"
                         >
