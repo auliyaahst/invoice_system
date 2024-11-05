@@ -180,12 +180,17 @@ app.post("/invoiceDetails", async (req, res) => {
 app.get("/invoices/:invoiceID/details", async (req, res) => {
   const { invoiceID } = req.params;
   try {
+    const parsedInvoiceID = parseInt(invoiceID, 10);
+    if (isNaN(parsedInvoiceID)) {
+      return res.status(400).json({ error: "Invalid invoice ID" });
+    }
+
     const invoiceDetails = await pool.query(
       `SELECT p.ProductName, id.Quantity, p.Price, id.LineTotal
        FROM InvoiceDetails id
        JOIN Products p ON id.ProductID = p.ProductID
        WHERE id.InvoiceID = $1`,
-      [invoiceID]
+      [parsedInvoiceID]
     );
     res.json(invoiceDetails.rows);
   } catch (err) {

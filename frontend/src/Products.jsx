@@ -1,15 +1,4 @@
-// Products.jsx
 import React, { useState, useEffect } from "react";
-import {
-  Disclosure,
-  DisclosureButton,
-  DisclosurePanel,
-  Menu,
-  MenuButton,
-  MenuItem,
-  MenuItems
-} from "@headlessui/react";
-import { Bars3Icon, BellIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import "./products.css";
 
 const navigation = [
@@ -131,14 +120,13 @@ const Products = () => {
     }
 
     try {
-      // First, create the new invoice and retrieve its ID
       const res = await fetch("http://localhost:5000/invoices/new", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          customerName: formData.name, // Replace or prompt for customer name
-          invoiceDate: new Date().toISOString(), // Current date as invoice date
-          amount: calculateTotal() // Pass the total amount for the invoice
+          customerName: formData.name,
+          invoiceDate: new Date().toISOString(),
+          amount: calculateTotal()
         })
       });
 
@@ -150,7 +138,6 @@ const Products = () => {
 
       const newInvoiceID = data.invoiceID;
 
-      // Now, add each product in the cart as an invoice detail
       for (const product of cart) {
         const resDetail = await fetch("http://localhost:5000/invoiceDetails", {
           method: "POST",
@@ -159,7 +146,7 @@ const Products = () => {
             invoiceID: newInvoiceID,
             productID: product.productid,
             quantity: product.quantity,
-            taxID: 1 // Hardcoded for now, update as needed
+            taxID: 1
           })
         });
 
@@ -170,7 +157,6 @@ const Products = () => {
         }
       }
 
-      // Clear the cart and reset the UI after successful invoice creation
       setCreateInvoice(cart, calculateTotal());
       setCart([]);
       setShowCart(false);
@@ -181,51 +167,9 @@ const Products = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-700">
-      <Disclosure as="nav" className="bg-gray-800">
-        <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-          <div className="relative flex h-16 items-center justify-between">
-            <div className="absolute inset-y-0 left-0 flex items-center sm:hidden">
-              <DisclosureButton className="group relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white">
-                <span className="sr-only">Open main menu</span>
-                <Bars3Icon className="block h-6 w-6 group-data-[open]:hidden" />
-                <XMarkIcon className="hidden h-6 w-6 group-data-[open]:block" />
-              </DisclosureButton>
-            </div>
-            <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-              <div className="flex flex-shrink-0 items-center">
-                <img
-                  alt="Your Company"
-                  src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=500"
-                  className="h-8 w-auto"
-                />
-              </div>
-              <div className="hidden sm:ml-6 sm:block">
-                <div className="flex space-x-4">
-                  {navigation.map(item =>
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      aria-current={item.current ? "page" : undefined}
-                      className={classNames(
-                        item.current
-                          ? "bg-gray-900 text-white"
-                          : "text-gray-300 hover:bg-gray-700 hover:text-white",
-                        "rounded-md px-3 py-2 text-sm font-medium"
-                      )}
-                    >
-                      {item.name}
-                    </a>
-                  )}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Disclosure>
-      <div className="relative">
-        <h1 className="text-xl font-bold text-slate-50">Products</h1>
-        {/* Cart Button with Badge */}
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-4 sm:p-6 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-xl font-bold text-slate-50 dark:text-slate-200 mb-4">Products</h1>
         <div className="fixed top-4 right-4 z-10">
           <button
             onClick={() => setShowCart(!showCart)}
@@ -239,20 +183,19 @@ const Products = () => {
           </button>
         </div>
 
-        {/* Product Grid */}
-        <div className="grid grid-cols-3 gap-4 p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {products.map(product => {
             const cartQuantity = getCartQuantity(product.productid);
 
             return (
               <div
                 key={product.productid}
-                className="bg-white p-4 rounded shadow"
+                className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow"
               >
-                <h3 className="font-bold mb-2">
+                <h3 className="font-bold mb-2 text-gray-900 dark:text-gray-100">
                   {product.productname}
                 </h3>
-                <p className="text-lg mb-2">
+                <p className="text-lg mb-2 text-gray-700 dark:text-gray-300">
                   {formatCurrency(product.price)}
                 </p>
 
@@ -264,7 +207,7 @@ const Products = () => {
                     Add to Cart
                   </button>
                   {cartQuantity > 0 &&
-                    <span className="text-sm bg-gray-100 px-2 py-1 rounded">
+                    <span className="text-sm bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">
                       {cartQuantity} in cart
                     </span>}
                 </div>
@@ -273,19 +216,16 @@ const Products = () => {
           })}
         </div>
         <button
-          className="new-product-btn"
+          className="new-product-btn mt-4"
           onClick={() => setShowNewProductModal(true)}
         >
           Add New Product
         </button>
 
-        {/* New Product Modal */}
         {showNewProductModal &&
           <div className="modal-overlay">
-            <div className="modal-content">
-              <h2 className="text-2xl font-bold mb-4 text-center">
-                New Product
-              </h2>
+            <div className="modal-content bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+              <h2 className="text-2xl font-bold mb-4 text-center">New Product</h2>
               <form onSubmit={handleAddProduct}>
                 <div className="form-group">
                   <label className="block mb-2">Product Name</label>
@@ -295,7 +235,7 @@ const Products = () => {
                     onChange={e =>
                       setFormData({ ...formData, name: e.target.value })}
                     required
-                    className="input-field"
+                    className="input-field bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
                 <div className="form-group">
@@ -309,7 +249,7 @@ const Products = () => {
                         price: parseFloat(e.target.value)
                       })}
                     required
-                    className="input-field"
+                    className="input-field bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                   />
                 </div>
                 <div className="modal-actions">
@@ -331,12 +271,11 @@ const Products = () => {
             </div>
           </div>}
 
-        {/* Cart Slide-out */}
         {showCart &&
-          <div className="fixed right-0 top-0 h-full w-96 bg-white shadow-lg z-20 transform transition-transform duration-300">
+          <div className="fixed right-0 top-0 h-full w-full sm:w-96 bg-white dark:bg-gray-800 shadow-lg z-20 transform transition-transform duration-300">
             <div className="p-4 h-full flex flex-col">
               <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Shopping Cart</h2>
+                <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100">Shopping Cart</h2>
                 <button
                   onClick={() => setShowCart(false)}
                   className="text-gray-500 hover:text-gray-700 text-2xl"
@@ -347,15 +286,15 @@ const Products = () => {
 
               <div className="flex-grow overflow-auto">
                 {cart.length === 0
-                  ? <p className="text-gray-500 text-center">Cart is empty</p>
+                  ? <p className="text-gray-500 text-center dark:text-gray-300">Cart is empty</p>
                   : <div className="space-y-4">
                       {cart.map(item =>
                         <div
                           key={item.productid}
-                          className="bg-gray-50 p-3 rounded"
+                          className="bg-gray-50 dark:bg-gray-700 p-3 rounded"
                         >
                           <div className="flex justify-between items-center mb-2">
-                            <span className="font-medium">
+                            <span className="font-medium text-gray-900 dark:text-gray-100">
                               {item.productname}
                             </span>
                             <button
@@ -373,11 +312,11 @@ const Products = () => {
                                     item.productid,
                                     item.quantity - 1
                                   )}
-                                className="bg-gray-200 px-2 rounded"
+                                className="bg-gray-200 dark:bg-gray-600 px-2 rounded"
                               >
                                 -
                               </button>
-                              <span className="w-8 text-center">
+                              <span className="w-8 text-center text-gray-900 dark:text-gray-100">
                                 {item.quantity}
                               </span>
                               <button
@@ -386,12 +325,12 @@ const Products = () => {
                                     item.productid,
                                     item.quantity + 1
                                   )}
-                                className="bg-gray-200 px-2 rounded"
+                                className="bg-gray-200 dark:bg-gray-600 px-2 rounded"
                               >
                                 +
                               </button>
                             </div>
-                            <span>
+                            <span className="text-gray-900 dark:text-gray-100">
                               {formatCurrency(item.price * item.quantity)}
                             </span>
                           </div>
@@ -400,10 +339,10 @@ const Products = () => {
                     </div>}
               </div>
 
-              <div className="border-t pt-4 mt-4">
+              <div className="border-t pt-4 mt-4 border-gray-200 dark:border-gray-700">
                 <div className="flex justify-between items-center mb-4">
-                  <span className="font-bold">Total:</span>
-                  <span className="font-bold">
+                  <span className="font-bold text-gray-900 dark:text-gray-100">Total:</span>
+                  <span className="font-bold text-gray-900 dark:text-gray-100">
                     {formatCurrency(calculateTotal())}
                   </span>
                 </div>
@@ -429,12 +368,12 @@ const Products = () => {
               {showCreateInvoice &&
                 <div className="modal-overlay">
                   <div className="modal-content">
-                    <h2 className="text-2xl font-bold mb-4 text-center">
+                    <h2 className="text-2xl font-bold mb-4 text-center text-gray-900 dark:text-gray-100">
                       Invoice
                     </h2>
                     <form onSubmit={handleCreateInvoice}>
                       <div className="form-group">
-                        <label className="block mb-2">Customer Name</label>
+                        <label className="block mb-2 text-gray-900 dark:text-gray-100">Customer Name</label>
                         <input
                           type="text"
                           value={formData.name}
