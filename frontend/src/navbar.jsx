@@ -7,13 +7,10 @@ import {
   Switch
 } from "@headlessui/react";
 import { MenuIcon, XIcon } from "@heroicons/react/outline";
-import Navbar from "./navbar";
-import Dashboard from "./Dashboard";
-import Products from "./Products";
 
 const navigation = [
   // { name: "Dashboard", href: "/", current: true },
-  { name: "Dashboard", href: "/invoice_system", current: true },
+  { name: "Dashboard", href: "/", current: true },
   { name: "Products", href: "/products", current: false }
 ];
 
@@ -21,7 +18,7 @@ function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-function App() {
+function Navbar() {
   const [darkMode, setDarkMode] = useState(() => {
     const savedMode = localStorage.getItem("darkMode");
     return savedMode ? JSON.parse(savedMode) : false;
@@ -50,7 +47,6 @@ function App() {
 
   return (
     <div className={darkMode ? "dark" : ""}>
-      {/* <Navbar /> */}
       <Disclosure as="nav" className="bg-gray-600 dark:bg-gray-700">
         {({ open }) =>
           <React.Fragment>
@@ -68,7 +64,6 @@ function App() {
                   </DisclosureButton>
                 </div>
                 <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-                  
                   <div className="hidden sm:ml-6 sm:block">
                     <div className="flex space-x-4">
                       {navigation.map(item =>
@@ -152,13 +147,8 @@ function App() {
             </DisclosurePanel>
           </React.Fragment>}
       </Disclosure>
-      <Routes>
-        {/* <Route path="/" element={<Dashboard darkMode={darkMode} />} /> */}
-        <Route path="/invoice_system" element={<Dashboard darkMode={darkMode} />} />
-        <Route path="/products" element={<Products darkMode={darkMode} />} />
-      </Routes>
     </div>
   );
 }
 
-export default App;
+export default Navbar;

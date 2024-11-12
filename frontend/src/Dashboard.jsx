@@ -187,7 +187,7 @@ const Dashboard = () => {
         {showViewInvoiceModal &&
           selectedInvoice &&
           <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-75 z-50 p-4 sm:p-8">
-            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-lg">
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg w-full max-w-4xl h-auto">
               <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
                 Invoice Details
               </h3>
@@ -233,6 +233,9 @@ const Dashboard = () => {
                   <thead>
                     <tr>
                       <th className="px-4 py-2 border-b text-gray-600 dark:text-gray-300">
+                        #
+                      </th>
+                      <th className="px-4 py-2 border-b text-gray-600 dark:text-gray-300">
                         Product
                       </th>
                       <th className="px-4 py-2 border-b text-gray-600 dark:text-gray-300">
@@ -247,15 +250,18 @@ const Dashboard = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {invoiceDetails.map(detail =>
+                    {invoiceDetails.map((detail, index) =>
                       <tr
                         key={detail.productid}
                         className="hover:bg-gray-100 dark:hover:bg-gray-700"
                       >
+                        <td className="border px-4 py-2 text-gray-800 dark:text-gray-200 text-center">
+                          {index + 1}
+                        </td>
                         <td className="border px-4 py-2 text-gray-800 dark:text-gray-200">
                           {detail.productname}
                         </td>
-                        <td className="border px-4 py-2 text-gray-800 dark:text-gray-200">
+                        <td className="border px-4 py-2 text-gray-800 dark:text-gray-200 text-center">
                           {detail.quantity}
                         </td>
                         <td className="border px-4 py-2 text-gray-800 dark:text-gray-200">
